@@ -44,7 +44,9 @@ controls:
   apple_settings:
     configuration_profiles:
       # … e.g.
-      # - path: ../lib/ios/declaration-profiles/Passcode settings.json
+       - path: ../lib/ios/declaration-profiles/passcode-settings.json
+         labels_exclude_any:
+         - C-Suite
       # - path: ../lib/ios/configuration-profiles/self-service.mobileconfig
   android_settings:
     configuration_profiles:
@@ -112,3 +114,4 @@ labels:
     description: Hosts belonging to the C-Suite
     label_membership_type: manual
     hosts:
+
