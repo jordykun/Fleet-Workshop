@@ -1,13 +1,17 @@
-name: 'Apply latest configuration to Fleet'
+name: "Apply latest configuration to Fleet"
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "**"
   pull_request:
+    paths:
+      - "**"
   workflow_dispatch: # allows manual triggering
   schedule:
-  - cron: '0 6 * * *' # Nightly 6AM UTC
+    - cron: "0 6 * * *" # Nightly 6AM UTC
 
 # Prevent concurrent runs of this workflow.
 concurrency:
@@ -26,25 +30,46 @@ jobs:
   fleet-gitops:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout GitOps repository
-        uses: actions/checkout@v4
+      - name: Checkout this repository
+        uses: actions/checkout@v6
+
+      - name: Make github action script executable
+        run: chmod +x ./.github/fleet-gitops/gitops.sh
 
       - name: Apply latest configuration to Fleet
-        uses: ./.github/gitops-action
+        uses: ./.github/fleet-gitops
         with:
           # Run GitOps in dry-run mode for pull requests.
           dry-run-only: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
-        # Add the environment variables below to the repository secrets.
-        # In addition, specify or add secrets for all the environment variables that are mentioned in the global/team YAML files.
+
+        # These environment variables can be set as repository secrets,
+        # alongside any other environment variables mentioned in your .yml files.
         env:
+          ###########################################################
+          # The server URL where Fleet is running.
+          #
+          #   • No trailing slash at the end
+          #   • `http://` or `https://` at the beginning.
+          #
+          # (You can copy this from the URL bar in your browser.)
+          #
+          # Warning: Careful not to change this URL after enrolling
+          # Apple devices with MDM pointed at Fleet. If this URL changes
+          # and Apple hosts already have MDM turned on, then end users
+          # will have to take action to restore MDM functionality (due
+          # to the way Apple's device management protocol works.)
+          ###########################################################
+          FLEET_URL: ${{ secrets.FLEET_URL && secrets.FLEET_URL || 'https://fleet.example.com' }}
+
+          ###########################################################
+          # A Fleet API token that your CI/CD builds will use
+          # to sync changes to Fleet.
+          #
+          # (You can copy your API token from the Fleet user interface
+          # by visiting "My account" > "Get API token".  Just remember,
+          # that token has an expiration date, so you'll eventually want
+          # to also follow the steps suggested on that screen to create
+          # an API-only user with a permanent token that is longer lived
+          # or that never expires.)
+          ###########################################################
           FLEET_API_TOKEN: ${{ secrets.FLEET_API_TOKEN }}
-          FLEET_PERSONAL_MOBILE_DEVICES_ENROLL_SECRET: ${{ secrets.FLEET_PERSONAL_MOBILE_DEVICES_ENROLL_SECRET }}
-          FLEET_URL: ${{ secrets.FLEET_URL }}
-          # Optional. Comma-separated list of extra HTTP headers ("Header:Value") sent on every
-          # request to Fleet, e.g. a Cloudflare Access service token. Add it as a repository
-          # secret to use it; leave the secret unset to send no extra headers.
-          FLEET_CUSTOM_HEADERS: ${{ secrets.FLEET_CUSTOM_HEADERS }}
-          FLEET_WORKSTATIONS_ENROLL_SECRET: ${{ secrets.FLEET_WORKSTATIONS_ENROLL_SECRET }}
-          FLEET_GLOBAL_ENROLL_SECRET: ${{ secrets.FLEET_GLOBAL_ENROLL_SECRET }}
-          
-          
