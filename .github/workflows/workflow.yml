@@ -36,9 +36,6 @@ jobs:
       - name: Make github action script executable
         run: chmod +x ./.github/fleet-gitops/gitops.sh
 
-      - name: chmod
-        run: chmod +x gitops.sh
-
       - name: Apply latest configuration to Fleet
         uses: ./.github/fleet-gitops
         with:
