@@ -110,5 +110,5 @@ software:
 labels:
   - name: C-Suite
     description: Hosts belonging to the C-Suite
-    labels_membership_type: manual
+    label_membership_type: manual
     hosts:
