@@ -72,6 +72,8 @@ controls:
 ###########################################################
 software:
   fleet_maintained_apps:
+    - slug: 1password/darwin
+      self_service: true
     - slug: aws-vpn-client/darwin
       self_service: true
   packages:
